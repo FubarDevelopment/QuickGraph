@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net461</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <DefineConstants>PEX_NOT_AVAILABLE;$(DefineConstants)</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="GraphML/*.graphml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="GraphML/Graph.log" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="GraphML/repro*.*" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../libraries/Pex/*.*" Exclude="../../libraries/Pex/Microsoft.Pex.Framework*.dll" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Heap/gcheap.xml" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Algorithms\RankedShortestPath\AdjacencyGraph.bin" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\QuickGraph.Data\QuickGraph.Data.csproj" />
+    <ProjectReference Include="..\..\src\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj" />
+    <ProjectReference Include="..\..\src\QuickGraph.Serialization\QuickGraph.Serialization.csproj" />
+    <ProjectReference Include="..\..\src\QuickGraph\QuickGraph.csproj" />
+    <ProjectReference Include="..\..\tools\QuickGraph.Heap\QuickGraph.Heap.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.2" />
+    <PackageReference Include="MSTest.TestAdapter" Version="1.3.2" />
+    <PackageReference Include="MSTest.TestFramework" Version="1.3.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Pex.Framework">
+      <HintPath>..\..\libraries\Pex\Microsoft.Pex.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Pex.Framework.Extensions">
+      <HintPath>..\..\libraries\Pex\Microsoft.Pex.Framework.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions" />
+  </ItemGroup>
+  <Import Project="../../Global.props" />
+</Project>

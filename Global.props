@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <Import Project="DotNetSdkMono.props" />
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <VersionPrefix>3.6</VersionPrefix>
+    <Product>FTP Server</Product>
+    <Copyright>Jonathan Peli de Halleux, MSIT 2007</Copyright>
+    <Company>Microsoft</Company>
+    <Authors>Jonathan de Halleux</Authors>
+    <PackageProjectUrl>https://github.com/FubarDevelopment/QuickGraph</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/FubarDevelopment/QuickGraph/blob/master/LICENSE.txt</PackageLicenseUrl>
+    <PackageReleaseNotes>https://github.com/FubarDevelopment/QuickGraph/releases</PackageReleaseNotes>
+    <RepositoryUrl>https://github.com/FubarDevelopment/QuickGraph.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <MinClientVersion>3.5</MinClientVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="11.1.0" PrivateAssets="All" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)'=='net461'">
+    <DefineConstants>$(DefineConstants);NETFRAMEWORK</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)'=='netstandard1.0' or '$(TargetFramework)'=='netstandard1.1' or '$(TargetFramework)'=='netstandard1.2' or '$(TargetFramework)'=='netstandard1.3' or '$(TargetFramework)'=='netstandard1.4' or '$(TargetFramework)'=='netstandard1.5' or '$(TargetFramework)'=='netstandard1.6' ">
+    <DefineConstants>$(DefineConstants);NETSTANDARD_PRE_2_0</DefineConstants>
+  </PropertyGroup>
+  
+</Project>
