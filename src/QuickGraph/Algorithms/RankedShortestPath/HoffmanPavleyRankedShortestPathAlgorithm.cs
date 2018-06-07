@@ -302,7 +302,7 @@ namespace QuickGraph.Algorithms.RankedShortestPath
             Contract.Requires(path != null);
             Contract.Requires(successors != null);
             Contract.Requires(startVertex != null);
-            Contract.Ensures(path[path.Count - 1].Target.Equals(this.goalVertex));
+            Contract.Ensures(path.Count == 0 || path[path.Count - 1].Target.Equals(this.goalVertex));
 
             var current = startVertex;
             TEdge edge;

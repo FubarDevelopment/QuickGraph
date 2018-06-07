@@ -14,16 +14,12 @@ namespace QuickGraph.Contracts
         #region IMutableEdgeListGraph<TVertex,TEdge> Members
         bool IMutableEdgeListGraph<TVertex, TEdge>.AddEdge(TEdge e)
         {
-            IMutableEdgeListGraph<TVertex, TEdge> ithis = this;
+            // IMutableEdgeListGraph<TVertex, TEdge> ithis = this;
             Contract.Requires(e != null);
-            Contract.Requires(ithis.ContainsVertex(e.Source));
-            Contract.Requires(ithis.ContainsVertex(e.Target));
-            Contract.Ensures(
-                ithis.AllowParallelEdges && ithis.ContainsEdge(e)
-                || !ithis.AllowParallelEdges && Contract.Result<bool>() == ithis.ContainsEdge(e));
-            // MJ: This doesn't work, reason unknown
-            // Contract.Ensures(ithis.AllowParallelEdges || Contract.Result<bool>() != Contract.OldValue(ithis.ContainsEdge(e)));
-            Contract.Ensures(ithis.EdgeCount == Contract.OldValue(ithis.EdgeCount) + (Contract.Result<bool>() ? 1 : 0));
+            Contract.Requires(this.ContainsVertex(e.Source));
+            Contract.Requires(this.ContainsVertex(e.Target));
+            Contract.Ensures(!Contract.Result<bool>() || this.ContainsEdge(e));
+            Contract.Ensures(this.EdgeCount == Contract.OldValue(this.EdgeCount) + (Contract.Result<bool>() ? 1 : 0));
 
             return default(bool);
         }
@@ -94,7 +90,7 @@ namespace QuickGraph.Contracts
             get { throw new NotImplementedException(); }
         }
 
-        bool IGraph<TVertex, TEdge>.AllowParallelEdges
+        public bool AllowParallelEdges
         {
             get { throw new NotImplementedException(); }
         }
@@ -108,7 +104,7 @@ namespace QuickGraph.Contracts
             get { throw new NotImplementedException(); }
         }
 
-        int IEdgeSet<TVertex, TEdge>.EdgeCount
+        public int EdgeCount
         {
             get { throw new NotImplementedException(); }
         }
@@ -118,7 +114,7 @@ namespace QuickGraph.Contracts
             get { throw new NotImplementedException(); }
         }
 
-        bool IEdgeSet<TVertex, TEdge>.ContainsEdge(TEdge edge)
+        public bool ContainsEdge(TEdge edge)
         {
             throw new NotImplementedException();
         }
@@ -141,7 +137,7 @@ namespace QuickGraph.Contracts
             get { throw new NotImplementedException(); }
         }
 
-        bool IImplicitVertexSet<TVertex>.ContainsVertex(TVertex vertex)
+        public bool ContainsVertex(TVertex vertex)
         {
             throw new NotImplementedException();
         }
