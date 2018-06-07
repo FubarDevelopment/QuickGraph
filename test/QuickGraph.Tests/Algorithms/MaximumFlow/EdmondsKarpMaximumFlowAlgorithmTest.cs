@@ -10,6 +10,7 @@ namespace QuickGraph.Tests.Algorithms.MaximumFlow
     public partial class EdmondsKarpMaximumFlowAlgorithmTest
     {
         [TestMethod]
+        [TestCategory(TestCategories.LongRunning)]
         public void EdmondsKarpMaxFlowAll()
         {
             Parallel.ForEach(TestGraphFactory.GetAdjacencyGraphs(), g =>

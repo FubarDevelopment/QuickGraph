@@ -11,6 +11,7 @@ namespace QuickGraph.Algorithms.ShortestPath
     public partial class UndirectedDijkstraShortestPathAlgorithmTest2
     {
         [TestMethod]
+        [TestCategory(TestCategories.LongRunning)]
         public void UndirectedDijkstraAll()
         {
             System.Threading.Tasks.Parallel.ForEach(TestGraphFactory.GetUndirectedGraphs(), g =>

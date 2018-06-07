@@ -21,6 +21,7 @@ namespace QuickGraph.Tests.Algorithms.MinimumSpanningTree
     public partial class MinimumSpanningTreeTest
     {
         [TestMethod]
+        [TestCategory(TestCategories.LongRunning)]
         public void KruskalMinimumSpanningTreeAll()
         {
             Parallel.ForEach(TestGraphFactory.GetUndirectedGraphs(), g =>
@@ -40,6 +41,7 @@ namespace QuickGraph.Tests.Algorithms.MinimumSpanningTree
         }
 
         [TestMethod]
+        [TestCategory(TestCategories.LongRunning)]
         public void PrimMinimumSpanningTreeAll()
         {
             Parallel.ForEach(TestGraphFactory.GetUndirectedGraphs(), g =>
@@ -125,6 +127,7 @@ namespace QuickGraph.Tests.Algorithms.MinimumSpanningTree
         }
 
         [TestMethod]
+        [TestCategory(TestCategories.LongRunning)]
         public void PrimKruskalMinimumSpanningTreeAll()
         {
             Parallel.ForEach(TestGraphFactory.GetUndirectedGraphs(), g =>

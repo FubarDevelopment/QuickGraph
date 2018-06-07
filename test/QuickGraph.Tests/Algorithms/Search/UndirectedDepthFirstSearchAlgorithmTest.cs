@@ -31,6 +31,7 @@ namespace QuickGraph.Algorithms.Search
         }
 
         [TestMethod]
+        [TestCategory(TestCategories.LongRunning)]
         public void UndirectedDepthFirstSearchAll()
         {
             Parallel.ForEach(TestGraphFactory.GetUndirectedGraphs(), g =>

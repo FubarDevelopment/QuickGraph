@@ -13,6 +13,7 @@ namespace QuickGraph.Algorithms.Search
     public class UndirectedBreadthFirstAlgorithmSearchTest
     {
         [TestMethod]
+        [TestCategory(TestCategories.LongRunning)]
         public void UndirectedBreadthFirstSearchAll()
         {
             TestGraphFactory.GetUndirectedGraphs().AsParallel()

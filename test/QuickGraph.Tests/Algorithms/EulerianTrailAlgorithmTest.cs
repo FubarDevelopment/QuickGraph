@@ -12,7 +12,7 @@ namespace QuickGraph.Algorithms
     public class EulerianTrailAlgorithmTest
     {
         [TestMethod]
-        [Ignore]
+        [TestCategory(TestCategories.LongRunning)]
         public void EulerianTrailAll()
         {
             Parallel.ForEach(TestGraphFactory.GetAdjacencyGraphs(), g =>

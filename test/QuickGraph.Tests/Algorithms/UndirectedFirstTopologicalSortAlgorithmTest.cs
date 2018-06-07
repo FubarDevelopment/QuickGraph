@@ -11,6 +11,7 @@ namespace QuickGraph.Algorithms
     public partial class UndirectedFirstTopologicalSortAlgorithmTest
     {
         [TestMethod]
+        [TestCategory(TestCategories.LongRunning)]
         public void UndirectedFirstTopologicalSortAll()
         {
             foreach (var g in TestGraphFactory.GetUndirectedGraphs())
