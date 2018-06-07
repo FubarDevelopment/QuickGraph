@@ -9,6 +9,8 @@
     <DebugType Condition=" '$(Configuration)' == 'Release' ">portable</DebugType> <!-- Required for EmbedSources -->
     <DebugType Condition=" '$(Configuration)' == 'Debug' ">full</DebugType> <!-- Required for EmbedSources -->
     <IsPackable Condition=" '$(IsPackable)' == '' ">true</IsPackable>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)quickgraph.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(Configuration)' == 'Release' ">
