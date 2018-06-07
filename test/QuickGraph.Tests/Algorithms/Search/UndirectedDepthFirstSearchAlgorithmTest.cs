@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using QuickGraph.Serialization;
 using Microsoft.Pex.Framework;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace QuickGraph.Algorithms.Search
@@ -13,7 +14,7 @@ namespace QuickGraph.Algorithms.Search
     {
         private static bool IsDescendant<TVertex>(
             Dictionary<TVertex,TVertex> parents,
-            TVertex u, 
+            TVertex u,
             TVertex v)
         {
             TVertex t;
@@ -34,8 +35,9 @@ namespace QuickGraph.Algorithms.Search
         [TestCategory(TestCategories.LongRunning)]
         public void UndirectedDepthFirstSearchAll()
         {
-            Parallel.ForEach(TestGraphFactory.GetUndirectedGraphs(), g =>
-                this.UndirectedDepthFirstSearch(g));
+            TestGraphFactory.GetUndirectedGraphs()
+                .AsParallel()
+                .ForAll(UndirectedDepthFirstSearch);
         }
 
         [PexMethod]

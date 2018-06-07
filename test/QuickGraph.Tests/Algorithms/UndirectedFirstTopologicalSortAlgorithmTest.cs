@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+
 using Microsoft.Pex.Framework;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using QuickGraph.Serialization;
@@ -14,8 +16,9 @@ namespace QuickGraph.Algorithms
         [TestCategory(TestCategories.LongRunning)]
         public void UndirectedFirstTopologicalSortAll()
         {
-            foreach (var g in TestGraphFactory.GetUndirectedGraphs())
-                this.Compute(g);
+            TestGraphFactory.GetUndirectedGraphs()
+                .AsParallel()
+                .ForAll(Compute);
         }
 
         [PexMethod]

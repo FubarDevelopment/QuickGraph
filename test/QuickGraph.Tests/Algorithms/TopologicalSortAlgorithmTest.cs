@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using Microsoft.Pex.Framework;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using QuickGraph.Serialization;
 using QuickGraph.Algorithms.TopologicalSort;
 using System.Text;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace QuickGraph.Algorithms
 {
@@ -14,8 +15,9 @@ namespace QuickGraph.Algorithms
         [TestMethod]
         public void TopologicalSortAll()
         {
-            foreach (var g in TestGraphFactory.GetAdjacencyGraphs())
-                this.SortCyclic(g);
+            TestGraphFactory.GetAdjacencyGraphs()
+                .AsParallel()
+                .ForAll(SortCyclic);
         }
 
         [PexMethod]
@@ -43,9 +45,9 @@ namespace QuickGraph.Algorithms
         {
             /* A puzzle from Facebook Seattle opening party:
              * http://www.facebook.com/note.php?note_id=146727365346299
-             You are given a list of relationships between the letters in a single word, all of which are in the form: 
-            "The first occurrence of A comes before N occurrences of B." 
-            You can safely assume that you have all such relationships except for any in which N would be 0. 
+             You are given a list of relationships between the letters in a single word, all of which are in the form:
+            "The first occurrence of A comes before N occurrences of B."
+            You can safely assume that you have all such relationships except for any in which N would be 0.
             Determine the original word, then go to http://www.facebook.com/seattle/[insert-word-here] to find the second part of the puzzle.
 
             The first occurrence of 'e' comes before 1 occurrence of 's'.
@@ -66,7 +68,7 @@ namespace QuickGraph.Algorithms
             The first occurrence of 'n' comes before 1 occurrence of 't'.
             The first occurrence of 'v' comes before 1 occurrence of 'i'.
             The first occurrence of 'i' comes before 1 occurrence of 't'.
-            The first occurrence of 'n' comes before 1 occurrence of 's'. 
+            The first occurrence of 'n' comes before 1 occurrence of 's'.
              */
             var graph = new AdjacencyGraph<Letter, Edge<Letter>>();
 
@@ -83,7 +85,7 @@ namespace QuickGraph.Algorithms
             var v = new Letter('v');
 
             graph.AddVertexRange(new List<Letter> {e1,e2,s,i1,i2,n,t,v});
-            
+
             graph.AddEdge(new Edge<Letter>(e1, s));
             graph.AddEdge(new Edge<Letter>(i1, n));
             graph.AddEdge(new Edge<Letter>(i1, i2));

@@ -1,4 +1,4 @@
-﻿using Microsoft.Pex.Framework;
+using Microsoft.Pex.Framework;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using QuickGraph.Algorithms;
 using QuickGraph.Serialization;
@@ -22,7 +22,7 @@ namespace QuickGraph.Tests.Algorithms.MaximumFlow
 
 
         [PexMethod]
-        public void EdmondsKarpMaxFlow<TVertex, TEdge>([PexAssumeNotNull]IMutableVertexAndEdgeListGraph<TVertex, TEdge> g, 
+        public void EdmondsKarpMaxFlow<TVertex, TEdge>([PexAssumeNotNull]IMutableVertexAndEdgeListGraph<TVertex, TEdge> g,
             EdgeFactory<TVertex, TEdge> edgeFactory)
             where TEdge : IEdge<TVertex>
         {

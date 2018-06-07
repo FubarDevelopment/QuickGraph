@@ -24,8 +24,9 @@ namespace QuickGraph.Tests.Algorithms.MinimumSpanningTree
         [TestCategory(TestCategories.LongRunning)]
         public void KruskalMinimumSpanningTreeAll()
         {
-            Parallel.ForEach(TestGraphFactory.GetUndirectedGraphs(), g =>
-                Kruskal(g));
+            TestGraphFactory.GetUndirectedGraphs()
+                .AsParallel()
+                .ForAll(Kruskal);
         }
 
         [PexMethod]
@@ -44,8 +45,9 @@ namespace QuickGraph.Tests.Algorithms.MinimumSpanningTree
         [TestCategory(TestCategories.LongRunning)]
         public void PrimMinimumSpanningTreeAll()
         {
-            Parallel.ForEach(TestGraphFactory.GetUndirectedGraphs(), g =>
-                Prim(g));
+            TestGraphFactory.GetUndirectedGraphs()
+                .AsParallel()
+                .ForAll(Prim);
         }
 
         [PexMethod]
@@ -61,8 +63,8 @@ namespace QuickGraph.Tests.Algorithms.MinimumSpanningTree
         }
 
         private static void AssertMinimumSpanningTree<TVertex, TEdge>(
-            IUndirectedGraph<TVertex, TEdge> g, 
-            IMinimumSpanningTreeAlgorithm<TVertex, TEdge> algorithm) 
+            IUndirectedGraph<TVertex, TEdge> g,
+            IMinimumSpanningTreeAlgorithm<TVertex, TEdge> algorithm)
             where TEdge : IEdge<TVertex>
         {
             var edgeRecorder = new EdgeRecorderObserver<TVertex, TEdge>();
@@ -74,7 +76,7 @@ namespace QuickGraph.Tests.Algorithms.MinimumSpanningTree
         }
 
         private static void AssertSpanningTree<TVertex, TEdge>(
-            IUndirectedGraph<TVertex,TEdge> g, 
+            IUndirectedGraph<TVertex,TEdge> g,
             IEnumerable<TEdge> tree)
             where TEdge : IEdge<TVertex>
         {
@@ -102,7 +104,7 @@ namespace QuickGraph.Tests.Algorithms.MinimumSpanningTree
         }
 
         private static void AssertAreEqual<TVertex, TEdge>(
-            IDictionary<TVertex, TEdge> left, 
+            IDictionary<TVertex, TEdge> left,
             IDictionary<TVertex, TEdge> right)
             where TEdge : IEdge<TVertex>
         {
@@ -130,8 +132,9 @@ namespace QuickGraph.Tests.Algorithms.MinimumSpanningTree
         [TestCategory(TestCategories.LongRunning)]
         public void PrimKruskalMinimumSpanningTreeAll()
         {
-            Parallel.ForEach(TestGraphFactory.GetUndirectedGraphs(), g =>
-                this.CompareRoot(g));
+            TestGraphFactory.GetUndirectedGraphs()
+                .AsParallel()
+                .ForAll(g => CompareRoot(g));
         }
 
         [PexMethod]

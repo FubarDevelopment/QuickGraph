@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics.Contracts;
@@ -16,7 +16,7 @@ namespace QuickGraph.Algorithms.RankedShortestPath
     /// </summary>
     /// <remarks>
     /// Reference:
-    /// Hoffman, W. and Pavley, R. 1959. A Method for the Solution of the Nth Best Path Problem. 
+    /// Hoffman, W. and Pavley, R. 1959. A Method for the Solution of the Nth Best Path Problem.
     /// J. ACM 6, 4 (Oct. 1959), 506-514. DOI= http://doi.acm.org/10.1145/320998.321004
     /// </remarks>
     /// <typeparam name="TVertex">type of the vertices</typeparam>
@@ -104,7 +104,7 @@ namespace QuickGraph.Algorithms.RankedShortestPath
             // first shortest path
             this.EnqueueFirstShortestPath(queue, successors, distances, root);
 
-            while (queue.Count > 0 && 
+            while (queue.Count > 0 &&
                 this.ComputedShortestPathCount < this.ShortestPathCount)
             {
                 if (cancelManager.IsCancelling) return;
@@ -141,8 +141,8 @@ namespace QuickGraph.Algorithms.RankedShortestPath
 
         private void EnqueueFirstShortestPath(
             IQueue<DeviationPath> queue,
-            IDictionary<TVertex, TEdge> successors, 
-            IDictionary<TVertex, double> distances, 
+            IDictionary<TVertex, TEdge> successors,
+            IDictionary<TVertex, double> distances,
             TVertex root)
         {
             Contract.Requires(queue != null);
@@ -173,19 +173,19 @@ namespace QuickGraph.Algorithms.RankedShortestPath
         }
 
         private void ComputeMinimumTree(
-            TVertex goal, 
-            out IDictionary<TVertex, TEdge> successors, 
+            TVertex goal,
+            out IDictionary<TVertex, TEdge> successors,
             out IDictionary<TVertex, double> distances)
         {
-            var reversedGraph = 
+            var reversedGraph =
                 new ReversedBidirectionalGraph<TVertex, TEdge>(this.VisitedGraph);
-            var successorsObserver = 
+            var successorsObserver =
                 new VertexPredecessorRecorderObserver<TVertex, SReversedEdge<TVertex, TEdge>>();
-            Func<SReversedEdge<TVertex, TEdge>, double> reversedEdgeWeight = 
+            Func<SReversedEdge<TVertex, TEdge>, double> reversedEdgeWeight =
                 e => this.edgeWeights(e.OriginalEdge);
-            var distancesObserser = 
+            var distancesObserser =
                 new VertexDistanceRecorderObserver<TVertex, SReversedEdge<TVertex, TEdge>>(reversedEdgeWeight);
-            var shortestpath = 
+            var shortestpath =
                 new DijkstraShortestPathAlgorithm<TVertex, SReversedEdge<TVertex, TEdge>>(
                     this, reversedGraph, reversedEdgeWeight, this.DistanceRelaxer);
             using (successorsObserver.Attach(shortestpath))
@@ -199,10 +199,10 @@ namespace QuickGraph.Algorithms.RankedShortestPath
         }
 
         private void EnqueueDeviationPaths(
-            IQueue<DeviationPath> queue, 
+            IQueue<DeviationPath> queue,
             TVertex root,
-            IDictionary<TVertex, TEdge> successors, 
-            IDictionary<TVertex, double> distances, 
+            IDictionary<TVertex, TEdge> successors,
+            IDictionary<TVertex, double> distances,
             TEdge[] path,
             int startEdge
             )
@@ -223,11 +223,11 @@ namespace QuickGraph.Algorithms.RankedShortestPath
                 var edge = path[iedge];
                 if (iedge >= startEdge)
                     this.EnqueueDeviationPaths(
-                        queue, 
-                        distances, 
-                        path, 
-                        iedge, 
-                        previousVertex, 
+                        queue,
+                        distances,
+                        path,
+                        iedge,
+                        previousVertex,
                         previousWeight,
                         pathVertices
                         );
@@ -247,11 +247,11 @@ namespace QuickGraph.Algorithms.RankedShortestPath
         }
 
         private void EnqueueDeviationPaths(
-            IQueue<DeviationPath> queue, 
-            IDictionary<TVertex, double> distances, 
-            TEdge[] path, 
-            int iedge, 
-            TVertex previousVertex, 
+            IQueue<DeviationPath> queue,
+            IDictionary<TVertex, double> distances,
+            TEdge[] path,
+            int iedge,
+            TVertex previousVertex,
             double previousWeight,
             Dictionary<TVertex, int> pathVertices
             )
@@ -284,7 +284,7 @@ namespace QuickGraph.Algorithms.RankedShortestPath
                             );
 
                     var deviation = new DeviationPath(
-                        path, 
+                        path,
                         iedge,
                         deviationEdge,
                         deviationWeight
@@ -295,8 +295,8 @@ namespace QuickGraph.Algorithms.RankedShortestPath
         }
 
         private void AppendShortestPath(
-            List<TEdge> path, 
-            IDictionary<TVertex, TEdge> successors, 
+            List<TEdge> path,
+            IDictionary<TVertex, TEdge> successors,
             TVertex startVertex)
         {
             Contract.Requires(path != null);
@@ -322,7 +322,7 @@ namespace QuickGraph.Algorithms.RankedShortestPath
             public readonly double Weight;
 
             public DeviationPath(
-                TEdge[] parentPath, 
+                TEdge[] parentPath,
                 int deviationIndex,
                 TEdge deviationEdge,
                 double weight)
