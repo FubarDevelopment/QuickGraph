@@ -40,7 +40,7 @@ namespace QuickGraph.Algorithms
         {
             Contract.Requires(rootVertex != null);
 
-            bool changed = Comparer<TVertex>.Default.Compare(this.rootVertex, rootVertex) != 0;
+            bool changed = !EqualityComparer<TVertex>.Default.Equals(this.rootVertex, rootVertex);
             this.rootVertex = rootVertex;
             if (changed)
                 this.OnRootVertexChanged(EventArgs.Empty);

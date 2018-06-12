@@ -65,7 +65,7 @@ namespace QuickGraph.Predicates
         public bool ContainsEdge(TEdge edge)
         {
             foreach (var e in this.Edges)
-                if (Comparer<TEdge>.Default.Compare(edge, e) == 0)
+                if (EqualityComparer<TEdge>.Default.Equals(edge, e))
                     return true;
             return false;
         }

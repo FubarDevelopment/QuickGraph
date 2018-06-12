@@ -49,10 +49,13 @@ namespace QuickGraph.Algorithms.TopologicalSort
                 throw new NonAcyclicGraphException();
         }
 
-        private void FinishVertex(TVertex v)
+        private void VertexFinished(TVertex v)
         {
             vertices.Insert(0, v);
         }
+
+        public event VertexAction<TVertex> DiscoverVertex;
+        public event VertexAction<TVertex> FinishVertex;
 
         protected override void InternalCompute()
         {
@@ -64,8 +67,10 @@ namespace QuickGraph.Algorithms.TopologicalSort
                     this.VisitedGraph,
                     new Dictionary<TVertex, GraphColor>(this.VisitedGraph.VertexCount)
                     );
-                dfs.BackEdge += new EdgeAction<TVertex, TEdge>(this.BackEdge);
-                dfs.FinishVertex += new VertexAction<TVertex>(this.FinishVertex);
+                dfs.BackEdge += BackEdge;
+                dfs.FinishVertex += VertexFinished;
+                dfs.DiscoverVertex += DiscoverVertex;
+                dfs.FinishVertex += FinishVertex;
 
                 dfs.Compute();
             }
@@ -73,8 +78,10 @@ namespace QuickGraph.Algorithms.TopologicalSort
             {
                 if (dfs != null)
                 {
-                    dfs.BackEdge -= new EdgeAction<TVertex, TEdge>(this.BackEdge);
-                    dfs.FinishVertex -= new VertexAction<TVertex>(this.FinishVertex);
+                    dfs.BackEdge -= BackEdge;
+                    dfs.FinishVertex -= VertexFinished;
+                    dfs.DiscoverVertex -= DiscoverVertex;
+                    dfs.FinishVertex -= FinishVertex;
                 }
             }
         }

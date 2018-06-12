@@ -11,11 +11,50 @@ namespace QuickGraph.Serialization
 {
     public static class GraphMLExtensions
     {
-        public static void SerializeToGraphML<TVertex, TEdge,TGraph>(
-#if !NET20
-            this 
+
+#if !NETSTANDARD_PRE_2_0
+
+        // The following use of XmlWriter.Create fails in Silverlight.
+
+        public static void SerializeToGraphML<TVertex, TEdge, TGraph>(
+            this TGraph graph,
+            string fileName,
+            VertexIdentity<TVertex> vertexIdentities,
+            EdgeIdentity<TVertex, TEdge> edgeIdentities)
+            where TEdge : IEdge<TVertex>
+            where TGraph : IEdgeListGraph<TVertex, TEdge>
+        {
+            Contract.Requires(fileName != null);
+            Contract.Requires(fileName.Length > 0);
+
+            var settings = new XmlWriterSettings() { Indent = true, IndentChars = "    " };
+            var writer = XmlWriter.Create(fileName, settings);
+            SerializeToGraphML<TVertex, TEdge, TGraph>(graph, writer, vertexIdentities, edgeIdentities);
+            writer.Flush();
+            writer.Close();
+        }
+
+        public static void SerializeToGraphML<TVertex, TEdge, TGraph>(
+            this TGraph graph,
+            string fileName
+            )
+            where TEdge : IEdge<TVertex>
+            where TGraph : IEdgeListGraph<TVertex, TEdge>
+        {
+            Contract.Requires(fileName != null);
+            Contract.Requires(fileName.Length > 0);
+
+            var settings = new XmlWriterSettings() { Indent = true, IndentChars = "    " };
+            var writer = XmlWriter.Create(fileName, settings);
+            SerializeToGraphML<TVertex, TEdge, TGraph>(graph, writer);
+            writer.Flush();
+            writer.Close();
+        }
+
 #endif
-            TGraph graph,
+
+        public static void SerializeToGraphML<TVertex, TEdge,TGraph>(
+            this TGraph graph,
             XmlWriter writer,
             VertexIdentity<TVertex> vertexIdentities,
             EdgeIdentity<TVertex, TEdge> edgeIdentities)
@@ -30,10 +69,7 @@ namespace QuickGraph.Serialization
         }
 
         public static void SerializeToGraphML<TVertex, TEdge, TGraph>(
-#if !NET20
-this 
-#endif
-            TGraph graph,
+            this TGraph graph,
             XmlWriter writer)
             where TEdge : IEdge<TVertex>
             where TGraph : IEdgeListGraph<TVertex, TEdge>
@@ -52,12 +88,26 @@ this
                 );
         }
 
-#if !SILVERLIGHT
+#if !NETSTANDARD_PRE_2_0
+
         public static void DeserializeFromGraphML<TVertex, TEdge,TGraph>(
-#if !NET20
-            this 
-#endif
-            TGraph graph,
+            this TGraph graph,
+            string fileName,
+            IdentifiableVertexFactory<TVertex> vertexFactory,
+            IdentifiableEdgeFactory<TVertex, TEdge> edgeFactory
+            )
+            where TEdge : IEdge<TVertex>
+            where TGraph : IMutableVertexAndEdgeListGraph<TVertex, TEdge>
+        {
+            Contract.Requires(fileName != null);
+            Contract.Requires(fileName.Length > 0);
+
+            var reader = new StreamReader(fileName);
+            DeserializeFromGraphML<TVertex, TEdge,TGraph>(graph, reader, vertexFactory, edgeFactory);
+        }
+
+        public static void DeserializeFromGraphML<TVertex, TEdge,TGraph>(
+            this TGraph graph,
             TextReader reader,
             IdentifiableVertexFactory<TVertex> vertexFactory,
             IdentifiableEdgeFactory<TVertex, TEdge> edgeFactory
@@ -71,7 +121,7 @@ this
             Contract.Requires(edgeFactory != null);
 
             var settings = new XmlReaderSettings();
-#if !SILVERLIGHT
+#if !NETSTANDARD_PRE_2_0
             settings.DtdProcessing = DtdProcessing.Ignore;
             settings.ValidationFlags = XmlSchemaValidationFlags.None;
 #endif
@@ -82,10 +132,7 @@ this
         }
 
         public static void DeserializeFromGraphML<TVertex, TEdge,TGraph>(
-#if !NET20
-            this 
-#endif
-            TGraph graph,
+            this TGraph graph,
             XmlReader reader,
             IdentifiableVertexFactory<TVertex> vertexFactory,
             IdentifiableEdgeFactory<TVertex, TEdge> edgeFactory
@@ -103,10 +150,7 @@ this
         }
 
         public static void DeserializeAndValidateFromGraphML<TVertex, TEdge,TGraph>(
-#if !NET20
-            this 
-#endif
-            TGraph graph,
+            this TGraph graph,
             TextReader reader,
             IdentifiableVertexFactory<TVertex> vertexFactory,
             IdentifiableEdgeFactory<TVertex, TEdge> edgeFactory
@@ -128,7 +172,7 @@ this
 
             try
             {
-                settings.ValidationEventHandler += new System.Xml.Schema.ValidationEventHandler(ValidationEventHandler);
+                settings.ValidationEventHandler += ValidationEventHandler;
 
                 // reader and validating
                 using (var xreader = XmlReader.Create(reader, settings))
@@ -136,7 +180,7 @@ this
             }
             finally
             {
-                settings.ValidationEventHandler -= new System.Xml.Schema.ValidationEventHandler(ValidationEventHandler);
+                settings.ValidationEventHandler -= ValidationEventHandler;
             }
         }
 

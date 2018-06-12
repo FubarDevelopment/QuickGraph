@@ -83,7 +83,7 @@ namespace QuickGraph
             int index = 0;
             foreach (var vertex in visitedGraph.Vertices)
             {
-                end = index + visitedGraph.OutDegree(vertex);
+                end = start + visitedGraph.OutDegree(vertex);
                 var range = new Range(start, end);
                 outEdgeStartRanges.Add(vertex, range);
                 foreach (var edge in visitedGraph.OutEdges(vertex))

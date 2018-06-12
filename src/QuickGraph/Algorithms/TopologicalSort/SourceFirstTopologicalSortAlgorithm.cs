@@ -100,7 +100,6 @@ namespace QuickGraph.Algorithms.TopologicalSort
             foreach (var v in this.VisitedGraph.Vertices)
             {
                 this.inDegrees.Add(v, 0);
-                this.heap.Enqueue(v);
             }
 
             foreach (var e in this.VisitedGraph.Edges)
@@ -108,6 +107,11 @@ namespace QuickGraph.Algorithms.TopologicalSort
                 if (e.Source.Equals(e.Target))
                     continue;
                 this.inDegrees[e.Target]++;
+            }
+
+            foreach (var v in this.VisitedGraph.Vertices)
+            {
+                this.heap.Enqueue(v);
             }
         }
     }

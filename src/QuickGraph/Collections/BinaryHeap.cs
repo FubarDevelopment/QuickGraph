@@ -12,21 +12,21 @@ namespace QuickGraph.Collections
     /// </summary>
     /// <remarks>
     /// Indexing rules:
-    /// 
+    ///
     /// parent index: index ¡ 1)/2
     /// left child: 2 * index + 1
     /// right child: 2 * index + 2
-    /// 
+    ///
     /// Reference:
     /// http://dotnetslackers.com/Community/files/folders/data-structures-and-algorithms/entry28722.aspx
     /// </remarks>
     /// <typeparam name="TValue">type of the value</typeparam>
     /// <typeparam name="TPriority">type of the priority metric</typeparam>
     [DebuggerDisplay("Count = {Count}")]
-    public class BinaryHeap<TPriority, TValue> 
+    public class BinaryHeap<TPriority, TValue>
         : IEnumerable<KeyValuePair<TPriority, TValue>>
     {
-        readonly Func<TPriority, TPriority, int> priorityComparsion;
+        readonly Comparison<TPriority> priorityComparison;
         KeyValuePair<TPriority, TValue>[] items;
         int count;
         int version;
@@ -37,22 +37,22 @@ namespace QuickGraph.Collections
             : this(DefaultCapacity, Comparer<TPriority>.Default.Compare)
         { }
 
-        public BinaryHeap(Func<TPriority, TPriority, int> priorityComparison)
+        public BinaryHeap(Comparison<TPriority> priorityComparison)
             : this(DefaultCapacity, priorityComparison)
         { }
 
-        public BinaryHeap(int capacity, Func<TPriority, TPriority, int> priorityComparison)
+        public BinaryHeap(int capacity, Comparison<TPriority> priorityComparison)
         {
             Contract.Requires(capacity >= 0);
             Contract.Requires(priorityComparison != null);
 
             this.items = new KeyValuePair<TPriority, TValue>[capacity];
-            this.priorityComparsion = priorityComparison;
+            this.priorityComparison = priorityComparison;
         }
 
-        public Func<TPriority, TPriority, int> PriorityComparison
+        public Comparison<TPriority> PriorityComparison
         {
-            get { return this.priorityComparsion; }
+            get { return this.priorityComparison; }
         }
 
         public int Capacity
@@ -73,16 +73,16 @@ namespace QuickGraph.Collections
             this.MinHeapifyDown(this.count - 1);
         }
 
+        // TODO: MinHeapifyDown is really MinHeapifyUp.  Do the renaming
         private void MinHeapifyDown(int start)
         {
-            int i = start;
-            int j = (i - 1) / 2;
-            while (i > 0 &&
-                this.Less(i, j))
+            int current = start;
+            int parent = (current - 1) / 2;
+            while (current > 0 && this.Less(current, parent))
             {
-                this.Swap(i, j);
-                i = j;
-                j = (i - 1) / 2;
+                this.Swap(current, parent);
+                current = parent;
+                parent = (current - 1) / 2;
             }
         }
 
@@ -92,6 +92,85 @@ namespace QuickGraph.Collections
             for (int i = 0; i < values.Length; ++i)
                 values[i] = this.items[i].Value;
             return values;
+        }
+
+        public KeyValuePair<TPriority, TValue>[] ToPriorityValueArray()
+        {
+            var array = new KeyValuePair<TPriority, TValue>[this.items.Length];
+            for (int i = 0; i < array.Length; ++i)
+                array[i] = this.items[i];
+            return array;
+        }
+
+        public bool IsConsistent()
+        {
+            int wrong = -1;
+
+            for (int i = 0; i < this.count; i++)
+            {
+                var l = 2 * i + 1;
+                var r = 2 * i + 2;
+                if (l < this.count && !this.LessOrEqual(i, l))
+                    wrong = i;
+                if (r < this.count && !this.LessOrEqual(i, r))
+                    wrong = i;
+            }
+
+            var correct = wrong == -1;
+            return correct;
+        }
+
+        private string EntryToString(int i)
+        {
+            if (i < 0 || i >= this.count)
+                return "null";
+
+            var kvp = this.items[i];
+            var k = kvp.Key;
+            var v = kvp.Value;
+
+            var str = "";
+            str += k.ToString();
+            str += " ";
+            str += v == null ? "null" : v.ToString();
+            return str;
+        }
+
+        public string ToString2()
+        {
+            var status = IsConsistent();
+            var str = status.ToString() + ": ";
+
+            for (int i = 0; i < this.items.Length; i++)
+            {
+                str += EntryToString(i);
+                str += ", ";
+            }
+            return str;
+        }
+
+        public string ToStringTree()
+        {
+            var status = IsConsistent();
+            var str = "Consistent? " + status.ToString();
+
+            for (int i = 0; i < this.count; i++)
+            {
+                var l = 2 * i + 1;
+                var r = 2 * i + 2;
+
+                var s = "index";
+                s += i.ToString();
+                s += ": ";
+                s += EntryToString(i);
+                s += " -> ";
+                s += EntryToString(l);
+                s += " and ";
+                s += EntryToString(r);
+
+                str += "\r\n" + s;
+            }
+            return str;
         }
 
         private void ResizeArray()
@@ -113,20 +192,33 @@ namespace QuickGraph.Collections
 
         public KeyValuePair<TPriority, TValue> RemoveMinimum()
         {
+            if (this.count == 0)
+                throw new InvalidOperationException("heap is empty");
+
             // shortcut for heap with 1 element.
             if (this.count == 1)
             {
                 this.version++;
                 return this.items[--this.count];
             }
-            return this.RemoveAt(0);
+            this.Swap(0, this.count - 1);
+            this.count--;
+            this.MinHeapifyUp(0);
+            return this.items[this.count];
         }
 
+        /// <summary>
+        /// Removes element at a certain index.
+        /// TODO: RemoveAt is wrong.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        [Obsolete("BinaryHeap.RemoveAt is wrong. Fix it before using it.")]
         public KeyValuePair<TPriority, TValue> RemoveAt(int index)
         {
             if (this.count == 0)
                 throw new InvalidOperationException("heap is empty");
-            if (index < 0 | index >= this.count | index + this.count < this.count)
+            if (index < 0 || index >= this.count)
                 throw new ArgumentOutOfRangeException("index");
 
             this.version++;
@@ -134,37 +226,31 @@ namespace QuickGraph.Collections
             if (this.count == 1)
                 return this.items[--this.count];
 
-            if (index < this.count - 1)
-            {
-                this.Swap(index, this.count - 1);
-                this.MinHeapifyUp(index);
-            }
+            this.Swap(index, this.count - 1);
+            this.count--;
+            this.MinHeapifyUp(index);
 
-            return this.items[--this.count];
+            return this.items[this.count];
         }
 
+        // TODO: MinHeapifyUp is really MinHeapifyDown.  Do the renaming
         private void MinHeapifyUp(int index)
         {
-            var left = 2 * index + 1;
-            var right = 2 * index + 2;
-            while (
-                    (left < this.count - 1 && !this.Less(index, left)) ||
-                    (right < this.count - 1 && !this.Less(index, right))
-                   )
+            while (true)
             {
-                if (right >= this.count - 1 ||
-                    this.Less(left, right))
-                {
-                    this.Swap(left, index);
-                    index = left;
-                }
-                else
-                {
-                    this.Swap(right, index);
-                    index = right;
-                }
-                left = 2 * index + 1;
-                right = 2 * index + 2;
+                var left = 2 * index + 1;
+                var right = 2 * index + 2;
+                var smallest = index;
+                if (left < this.count && this.Less(left, smallest))
+                    smallest = left;
+                if (right < this.count && this.Less(right, smallest))
+                    smallest = right;
+
+                if (smallest == index)
+                    break;
+
+                this.Swap(smallest, index);
+                index = smallest;
             }
         }
 
@@ -181,18 +267,16 @@ namespace QuickGraph.Collections
         public bool MinimumUpdate(TPriority priority, TValue value)
         {
             // find index
-            for (int i = 0; i < this.count; i++)
+            var index = IndexOf(value);
+
+            if (index >= 0)
             {
-                if (object.Equals(value, this.items[i].Value))
+                if (this.priorityComparison(priority, this.items[index].Key) <= 0)
                 {
-                    if( this.priorityComparsion(priority, this.items[i].Key) <= 0)
-                    {
-                        this.RemoveAt(i);
-                        this.Add(priority, value);
-                        return true;
-                    }
-                    return false;
+                    this.Update(priority, value);
+                    return true;
                 }
+                return false;
             }
 
             // not in collection
@@ -204,10 +288,34 @@ namespace QuickGraph.Collections
         {
             // find index
             var index = this.IndexOf(value);
-            // remove if needed
+
+            // if it exists, update, else add
             if (index > -1)
-                this.RemoveAt(index);
+            {
+                var neww = priority;
+                var oldd = this.items[index].Key;
+                this.items[index] = new KeyValuePair<TPriority,TValue>(neww, value);
+
+                if (this.priorityComparison(neww, oldd) > 0)
+                    MinHeapifyUp(index);
+                else if (this.priorityComparison(neww, oldd) < 0)
+                    MinHeapifyDown(index);
+            }
+            else
+            {
             this.Add(priority, value);
+        }
+        }
+
+        [Pure]
+        private bool LessOrEqual(int i, int j)
+        {
+            Contract.Requires(
+                i >= 0 & i < this.count &
+                j >= 0 & j < this.count &
+                i != j);
+
+            return this.priorityComparison(this.items[i].Key, this.items[j].Key) <= 0;
         }
 
         [Pure]
@@ -215,18 +323,21 @@ namespace QuickGraph.Collections
         {
             Contract.Requires(
                 i >= 0 & i < this.count &
-                j >= 0 & j < this.count &
-                i != j);
+                j >= 0 & j < this.count);
 
-            return this.priorityComparsion(this.items[i].Key, this.items[j].Key) <= 0;
+            return this.priorityComparison(this.items[i].Key, this.items[j].Key) < 0;
         }
 
         private void Swap(int i, int j)
         {
             Contract.Requires(
                 i >= 0 && i < this.count &&
-                j >= 0 && j < this.count &&
-                i != j);
+                j >= 0 && j < this.count);
+
+            if (i == j)
+            {
+                return;
+            }
 
             var kv = this.items[i];
             this.items[i] = this.items[j];
@@ -246,8 +357,8 @@ namespace QuickGraph.Collections
                 {
                     var left = 2 * index + 1;
                     var right = 2 * index + 2;
-                    return  (left >= count || this.Less(index, left)) &&
-                            (right >= count || this.Less(index, right));
+                    return  (left >= count || this.LessOrEqual(index, left)) &&
+                            (right >= count || this.LessOrEqual(index, right));
                 })
             );
         }

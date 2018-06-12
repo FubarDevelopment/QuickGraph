@@ -85,7 +85,7 @@ namespace QuickGraph.Graphviz.Dot
             }
             if (!this.FontGraphvizColor.Equals(GraphvizColor.Black))
             {
-                dic["fontGraphvizColor"] = this.FontGraphvizColor;
+                dic["fontcolor"] = this.FontGraphvizColor;
             }
             this.Head.AddParameters(dic);
             if (this.HeadArrow != null)
@@ -111,7 +111,7 @@ namespace QuickGraph.Graphviz.Dot
             }
             if (!this.StrokeGraphvizColor.Equals(GraphvizColor.Black))
             {
-                dic["GraphvizColor"] = this.StrokeGraphvizColor;
+                dic["color"] = this.StrokeGraphvizColor;
             }
             if (this.Style != GraphvizEdgeStyle.Unspecified)
             {

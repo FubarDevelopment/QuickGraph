@@ -8,15 +8,15 @@ using System.Net;
 namespace QuickGraph.Serialization
 {
     /// <summary>
-    /// A resolver that loads graphml DTD and XSD schemas 
+    /// A resolver that loads graphml DTD and XSD schemas
     /// from embedded resources.
     /// </summary>
-    public sealed class GraphMLXmlResolver 
+    public sealed class GraphMLXmlResolver
         : XmlResolver
     {
         readonly XmlResolver baseResolver;
 
-#if !SILVERLIGHT
+#if !NETSTANDARD_PRE_2_0
         public GraphMLXmlResolver()
             :this(new XmlUrlResolver())
         {
@@ -31,7 +31,7 @@ namespace QuickGraph.Serialization
 
         public const string GraphMLNamespace = "http://graphml.graphdrawing.org/xmlns";
 
-#if !SILVERLIGHT
+#if !NETSTANDARD_PRE_2_0
         ICredentials _credentials;
         public override ICredentials Credentials
         {
@@ -41,7 +41,7 @@ namespace QuickGraph.Serialization
             }
         }
 #endif
- 
+
         public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn)
         {
             if (absoluteUri.AbsoluteUri == "http://www.graphdrawing.org/dtds/graphml.dtd")

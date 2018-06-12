@@ -12,5 +12,8 @@
   <ItemGroup>
     <ProjectReference Include="..\QuickGraph\QuickGraph.csproj" />
   </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
+    <PackageReference Include="System.ComponentModel.Primitives" Version="4.1.0" />
+  </ItemGroup>
   <Import Project="../../PackageLibrary.props" />
 </Project>

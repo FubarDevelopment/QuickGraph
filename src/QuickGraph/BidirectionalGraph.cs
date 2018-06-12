@@ -622,6 +622,23 @@ namespace QuickGraph
         }
 
         #region ICloneable Members
+
+        /// <summary>
+        /// Copy constructor that creates sufficiently deep copy of the graph.
+        /// </summary>
+        /// <param name="other"></param>
+        public BidirectionalGraph(BidirectionalGraph<TVertex, TEdge> other)
+        {
+            Contract.Requires(other != null);
+
+            this.vertexInEdges = other.vertexInEdges.Clone();
+            this.vertexOutEdges = other.vertexOutEdges.Clone();
+            this.edgeCount = other.edgeCount;
+            this.edgeCapacity = other.edgeCapacity;
+            this.allowParallelEdges = other.allowParallelEdges;
+        }
+
+
         private BidirectionalGraph(
             IVertexEdgeDictionary<TVertex, TEdge> vertexInEdges,
             IVertexEdgeDictionary<TVertex, TEdge> vertexOutEdges,
@@ -643,13 +660,7 @@ namespace QuickGraph
 
         public BidirectionalGraph<TVertex, TEdge> Clone()
         {
-            return new BidirectionalGraph<TVertex, TEdge>(
-                this.vertexInEdges.Clone(),
-                this.vertexOutEdges.Clone(),
-                this.edgeCount,
-                this.edgeCapacity,
-                this.allowParallelEdges
-                );
+            return new BidirectionalGraph<TVertex, TEdge>(this);
         }
 
 #if !NETSTANDARD_PRE_2_0

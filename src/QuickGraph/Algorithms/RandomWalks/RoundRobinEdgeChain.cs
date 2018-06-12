@@ -50,7 +50,9 @@ namespace QuickGraph.Algorithms.RandomWalks
                 var e = Enumerable.ElementAt(edges, index);
                 this.outEdgeIndices[u] = (++index) % edgeCount;
                 successor = e;
+                return true;
             }
+
             successor = default(TEdge);
             return false;
         }

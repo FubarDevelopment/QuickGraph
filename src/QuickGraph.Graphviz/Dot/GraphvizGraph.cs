@@ -86,7 +86,7 @@ namespace QuickGraph.Graphviz.Dot
             }
             if (!this.BackgroundGraphvizColor.Equals(GraphvizColor.White))
             {
-                pairs["bgGraphvizColor"] = this.BackgroundGraphvizColor;
+                pairs["bgcolor"] = this.BackgroundGraphvizColor;
             }
             if (this.IsCentered)
             {
@@ -115,7 +115,7 @@ namespace QuickGraph.Graphviz.Dot
             }
             if (!this.FontGraphvizColor.Equals(GraphvizColor.Black))
             {
-                pairs["fontGraphvizColor"] = this.FontGraphvizColor;
+                pairs["fontcolor"] = this.FontGraphvizColor;
             }
             if (this.Label != null)
             {

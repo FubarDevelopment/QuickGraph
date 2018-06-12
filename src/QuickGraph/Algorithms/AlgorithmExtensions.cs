@@ -579,6 +579,46 @@ namespace QuickGraph.Algorithms
             topo.Compute(vertices);
         }
 
+        public static IEnumerable<TVertex> SourceFirstBidirectionalTopologicalSort<TVertex, TEdge>(
+            this IBidirectionalGraph<TVertex, TEdge> visitedGraph,
+            TopologicalSortDirection direction)
+            where TEdge : IEdge<TVertex>
+        {
+            Contract.Requires(visitedGraph != null);
+
+            var vertices = new List<TVertex>(visitedGraph.VertexCount);
+            SourceFirstBidirectionalTopologicalSort(visitedGraph, vertices, direction);
+            return vertices;
+        }
+
+        public static IEnumerable<TVertex> SourceFirstBidirectionalTopologicalSort<TVertex, TEdge>(
+            this IBidirectionalGraph<TVertex, TEdge> visitedGraph)
+            where TEdge : IEdge<TVertex>
+        {
+            return SourceFirstBidirectionalTopologicalSort(visitedGraph, TopologicalSortDirection.Forward);
+        }
+
+        public static void SourceFirstBidirectionalTopologicalSort<TVertex, TEdge>(
+            this IBidirectionalGraph<TVertex, TEdge> visitedGraph,
+            IList<TVertex> vertices,
+            TopologicalSortDirection direction)
+            where TEdge : IEdge<TVertex>
+        {
+            Contract.Requires(visitedGraph != null);
+            Contract.Requires(vertices != null);
+
+            var topo = new SourceFirstBidirectionalTopologicalSortAlgorithm<TVertex, TEdge>(visitedGraph, direction);
+            topo.Compute(vertices);
+        }
+
+        public static void SourceFirstBidirectionalTopologicalSort<TVertex, TEdge>(
+            this IBidirectionalGraph<TVertex, TEdge> visitedGraph,
+            IList<TVertex> vertices)
+            where TEdge : IEdge<TVertex>
+        {
+            SourceFirstBidirectionalTopologicalSort(visitedGraph, vertices, TopologicalSortDirection.Forward);
+        }
+
         /// <summary>
         /// Computes the connected components of a graph
         /// </summary>
@@ -829,14 +869,14 @@ namespace QuickGraph.Algorithms
                 var dfs = new DepthFirstSearchAlgorithm<TVertex, TEdge>(g);
                 try
                 {
-                    dfs.BackEdge += new EdgeAction<TVertex, TEdge>(dfs_BackEdge);
+                    dfs.BackEdge += dfs_BackEdge;
                     isDag = true;
                     dfs.Compute();
                     return isDag;
                 }
                 finally
                 {
-                    dfs.BackEdge -= new EdgeAction<TVertex, TEdge>(dfs_BackEdge);
+                    dfs.BackEdge -= dfs_BackEdge;
                 }
             }
 
@@ -1049,6 +1089,32 @@ namespace QuickGraph.Algorithms
             flow.Compute(source, sink);
             flowPredecessors = flow.Predecessors.TryGetValue;
             return flow.MaxFlow;
+        }
+
+
+        /*
+         * Code by Yoad Snapir <yoadsn@gmail.com>
+         * Taken from https://github.com/yoadsn/ArrowDiagramGenerator because PR was not opened
+         * 
+         * */
+
+        public static BidirectionalGraph<TVertex, TEdge> ComputeTransitiveReduction<TVertex, TEdge>(
+            this BidirectionalGraph<TVertex, TEdge> visitedGraph
+            ) where TEdge : IEdge<TVertex>
+        {
+            var algo = new TransitiveReductionAlgorithm<TVertex, TEdge>(visitedGraph);
+            algo.Compute();
+            return algo.TransitiveReduction;
+        }
+
+        public static BidirectionalGraph<TVertex, TEdge> ComputeTransitiveClosure<TVertex, TEdge>(
+            this BidirectionalGraph<TVertex, TEdge> visitedGraph,
+            Func<TVertex, TVertex, TEdge> createEdge
+            ) where TEdge : IEdge<TVertex>
+        {
+            var algo = new TransitiveClosureAlgorithm<TVertex, TEdge>(visitedGraph, createEdge);
+            algo.Compute();
+            return algo.TransitiveClosure;
         }
     }
 }

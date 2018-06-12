@@ -12,6 +12,65 @@ using System.ComponentModel;
 
 namespace QuickGraph.Serialization
 {
+    public static class XmlWriterExtensions
+    {
+        public static void WriteBooleanArray(XmlWriter xmlWriter, IList<Boolean> value)
+        {
+            WriteArray<Boolean>(xmlWriter, value);
+        }
+
+        public static void WriteInt32Array(XmlWriter xmlWriter, IList<Int32> value)
+        {
+            WriteArray<Int32>(xmlWriter, value);
+        }
+
+        public static void WriteInt64Array(XmlWriter xmlWriter, IList<Int64> value)
+        {
+            WriteArray<Int64>(xmlWriter, value);
+        }
+        
+        public static void WriteSingleArray(XmlWriter xmlWriter, IList<Single> value)
+        {
+            WriteArray<Single>(xmlWriter, value);
+        }
+
+        public static void WriteDoubleArray(XmlWriter xmlWriter, IList<Double> value)
+        {
+            WriteArray<Double>(xmlWriter, value);
+        }
+        
+        public static void WriteStringArray(XmlWriter xmlWriter, IList<String> value)
+        {
+            WriteArray<String>(xmlWriter, value);
+        }
+
+        /// <summary>
+        /// Writes an array as space separated values.  There is a space after every value, even the last one.
+        /// If array is null, it writes "null".  If array is empty, it writes empty string.  If array is a string array 
+        /// with only one element "null", then it writes "null ".
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="xmlWriter"></param>
+        /// <param name="value"></param>
+        public static void WriteArray<T>(XmlWriter xmlWriter, IList<T> value)
+        {
+            if (value == null)
+            {
+                xmlWriter.WriteString("null");
+                return;
+            }
+
+            var strArray = new string[value.Count];
+            for (int i = 0; i < value.Count; i++)
+            {
+                strArray[i] = value[i].ToString();
+            }
+            var str = String.Join(" ", strArray);
+            str += " ";
+            xmlWriter.WriteString(str);
+        }
+    }
+
     /// <summary>
     /// A GraphML ( http://graphml.graphdrawing.org/ ) format serializer.
     /// </summary>
@@ -139,6 +198,22 @@ namespace QuickGraph.Serialization
                     WriteValueMethods.Add(typeof(float), writer.GetMethod("WriteValue", new Type[] { typeof(float) }));
                     WriteValueMethods.Add(typeof(double), writer.GetMethod("WriteValue", new Type[] { typeof(double) }));
                     WriteValueMethods.Add(typeof(string), writer.GetMethod("WriteString", new Type[] { typeof(string) }));
+
+                    var writerExtensions = typeof(XmlWriterExtensions);
+                    WriteValueMethods.Add(typeof(Boolean[]), writerExtensions.GetMethod("WriteBooleanArray"));
+                    WriteValueMethods.Add(typeof(Int32[]), writerExtensions.GetMethod("WriteInt32Array"));
+                    WriteValueMethods.Add(typeof(Int64[]), writerExtensions.GetMethod("WriteInt64Array"));
+                    WriteValueMethods.Add(typeof(Single[]), writerExtensions.GetMethod("WriteSingleArray"));
+                    WriteValueMethods.Add(typeof(Double[]), writerExtensions.GetMethod("WriteDoubleArray"));
+                    WriteValueMethods.Add(typeof(String[]), writerExtensions.GetMethod("WriteStringArray"));
+
+                    WriteValueMethods.Add(typeof(IList<Boolean>), writerExtensions.GetMethod("WriteBooleanArray"));
+                    WriteValueMethods.Add(typeof(IList<Int32>), writerExtensions.GetMethod("WriteInt32Array"));
+                    WriteValueMethods.Add(typeof(IList<Int64>), writerExtensions.GetMethod("WriteInt64Array"));
+                    WriteValueMethods.Add(typeof(IList<Single>), writerExtensions.GetMethod("WriteSingleArray"));
+                    WriteValueMethods.Add(typeof(IList<Double>), writerExtensions.GetMethod("WriteDoubleArray"));
+                    WriteValueMethods.Add(typeof(IList<String>), writerExtensions.GetMethod("WriteStringArray"));
+
                 }
 
                 public static bool TryGetWriteValueMethod(Type valueType, out MethodInfo method)
@@ -232,7 +307,10 @@ namespace QuickGraph.Serialization
                     gen.Emit(OpCodes.Ldarg_0);
                     gen.Emit(OpCodes.Ldarg_1);
                     gen.EmitCall(OpCodes.Callvirt,getMethod,null);
-                    gen.EmitCall(OpCodes.Callvirt, writeValueMethod, null);
+                    // When reading scalar values we call member methods of XmlReader, while for array values 
+                    // we call our own static methods.  These two types of methods seem to need different opcode.
+                    var opcode = writeValueMethod.DeclaringType == typeof(XmlWriterExtensions) ? OpCodes.Call : OpCodes.Callvirt;
+                    gen.EmitCall(opcode, writeValueMethod, null);
 
                     // writer.WriteEndElement()
                     gen.Emit(OpCodes.Ldarg_0);
@@ -383,6 +461,97 @@ namespace QuickGraph.Serialization
                 this.WriteAttributeDefinitions(forNode, nodeType);
             }
 
+            private static string ConstructTypeCodeForSimpleType(Type t)
+            {
+                switch (Type.GetTypeCode(t))
+                {
+                    case TypeCode.Boolean:
+                        return "boolean";
+                    case TypeCode.Int32:
+                        return "int";
+                    case TypeCode.Int64:
+                        return "long";
+                    case TypeCode.Single:
+                        return "float";
+                    case TypeCode.Double:
+                        return "double";
+                    case TypeCode.String:
+                        return "string";
+                    case TypeCode.Object:
+                        return "object";
+                    default:
+                        return "invalid";
+                }
+            }
+
+            private string ConstructTypeCode(Type t)
+            {
+                var code = ConstructTypeCodeForSimpleType(t);
+
+                if (code == "invalid")
+                {
+                    throw new NotSupportedException("Simple type not supported by the GraphML schema");
+                }
+
+                // Recognize arrays of certain simple types.  Typestring is still "string" for all arrays,
+                // because GraphML schema doesn't have an array type.
+                if (code == "object")
+                {
+                    var it = t.Name == "IList`1" ? t : t.GetInterface("IList`1", false);
+                    if (it != null && it.Name == "IList`1")
+                    {
+                        var e = it.GetGenericArguments()[0];
+                        var c = ConstructTypeCodeForSimpleType(e);
+                        if (c == "object" || c == "invalid")
+                        {
+                            throw new NotSupportedException("Array type not supported by GraphML schema");
+                        }
+                        code = "string";
+                    }
+                }
+
+                return code;
+
+#if false
+                switch (Type.GetTypeCode(t))
+                {
+                    case TypeCode.Boolean:
+                         return "boolean";
+                    case TypeCode.Int32:
+                        return "int";
+                    case TypeCode.Int64:
+                        return "long";
+                    case TypeCode.Single:
+                        return "float";
+                    case TypeCode.Double:
+                        return "double";
+                    case TypeCode.String:
+                        return "string";
+                    case TypeCode.Object:
+                        if (t.IsArray)
+                        {
+                            var e = t.GetElementType();
+                            switch(Type.GetTypeCode(e))
+                            {
+                                case TypeCode.Boolean:
+                                case TypeCode.Int32:
+                                case TypeCode.Int64:
+                                case TypeCode.Single:
+                                case TypeCode.Double:
+                                case TypeCode.String:
+                                    break;
+                                default:
+                                    throw new NotSupportedException("This array element type is not supported by GraphML schema");
+                            }
+                            return "string";                            
+                        }
+                        throw new NotSupportedException("Object type other than array is not supported by GraphML schema");
+                    default:
+                        throw new NotSupportedException("Type not supported by the GraphML schema");
+                }
+#endif
+            }
+
             private void WriteAttributeDefinitions(string forNode, Type nodeType)
             {
                 Contract.Requires(forNode != null);
@@ -394,34 +563,25 @@ namespace QuickGraph.Serialization
                     var name = kv.Name;
                     Type propertyType = property.PropertyType;
 
-                    //<key id="d1" for="edge" attr.name="weight" attr.type="double"/>
-                    this.Writer.WriteStartElement("key", GraphMLXmlResolver.GraphMLNamespace);
-                    this.Writer.WriteAttributeString("id", name);
-                    this.Writer.WriteAttributeString("for", forNode);
-                    this.Writer.WriteAttributeString("attr.name", name);
-
-                    switch(Type.GetTypeCode(propertyType))
                     {
-                        case TypeCode.Boolean:
-                            this.Writer.WriteAttributeString("attr.type", "boolean");
-                            break;
-                        case TypeCode.Int32:
-                            this.Writer.WriteAttributeString("attr.type", "int");
-                            break;
-                        case TypeCode.Int64:
-                            this.Writer.WriteAttributeString("attr.type", "long");
-                            break;
-                        case TypeCode.Single:
-                            this.Writer.WriteAttributeString("attr.type", "float");
-                            break;
-                        case TypeCode.Double:
-                            this.Writer.WriteAttributeString("attr.type", "double");
-                            break;
-                        case TypeCode.String:
-                            this.Writer.WriteAttributeString("attr.type", "string");
-                            break;
-                        default:
+                        //<key id="d1" for="edge" attr.name="weight" attr.type="double"/>
+                        this.Writer.WriteStartElement("key", GraphMLXmlResolver.GraphMLNamespace);
+                        this.Writer.WriteAttributeString("id", name);
+                        this.Writer.WriteAttributeString("for", forNode);
+                        this.Writer.WriteAttributeString("attr.name", name);
+
+                        string typeCodeStr;
+
+                        try
+                        {
+                            typeCodeStr = ConstructTypeCode(propertyType);
+                        }
+                        catch (NotSupportedException)
+                        {
                             throw new NotSupportedException(String.Format("Property type {0}.{1} not supported by the GraphML schema", property.DeclaringType, property.Name));
+                        }
+
+                        this.Writer.WriteAttributeString("attr.type", typeCodeStr);
                     }
 
                     // <default>...</default>
@@ -429,7 +589,8 @@ namespace QuickGraph.Serialization
                     if (kv.TryGetDefaultValue(out defaultValue))
                     {
                         this.Writer.WriteStartElement("default");
-                        switch (Type.GetTypeCode(defaultValue.GetType()))
+                        var defaultValueType = defaultValue.GetType();
+                        switch (Type.GetTypeCode(defaultValueType))
                         {
                             case TypeCode.Boolean:
                                 this.Writer.WriteString(XmlConvert.ToString((bool)defaultValue));
@@ -449,6 +610,12 @@ namespace QuickGraph.Serialization
                             case TypeCode.String:
                                 this.Writer.WriteString((string)defaultValue);
                                 break;
+                            case TypeCode.Object:
+                                if (defaultValueType.IsArray)
+                                {
+                                    throw new NotImplementedException("Default values for array types are not implemented");
+                                }
+                                throw new NotSupportedException(String.Format("Property type {0}.{1} not supported by the GraphML schema", property.DeclaringType, property.Name));
                             default:
                                 throw new NotSupportedException(String.Format("Property type {0}.{1} not supported by the GraphML schema", property.DeclaringType, property.Name));
                         }
